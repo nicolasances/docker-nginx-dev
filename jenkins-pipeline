@@ -1,0 +1,36 @@
+pipeline {
+    agent any
+    
+    stages {
+        
+        stage("Download") {
+            
+            steps {
+                
+                sh 'rm -r -f /project'
+                sh 'git clone https://github.com/nicolasances/docker-nginx-dev.git /project'
+            }
+        }
+        
+        stage("Build Docker Image") {
+            
+            steps {
+                
+                dir('/project') {
+                    
+                    sh 'docker build -t imatz-nginx-dev .'
+                }
+            }
+        }
+        
+        stage("Deploy") {
+            
+            steps {
+                
+                sh 'docker stop imatz-nginx-dev || true'
+                sh 'docker rm imatz-nginx-dev || true'
+                sh 'docker run -d -p 80:80 --network totonet --name imatz-nginx-dev imatz-nginx-dev'
+            }
+        }
+    }
+}
